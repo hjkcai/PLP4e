@@ -1,0 +1,27 @@
+{-# START_FILE {{name}}.cabal #-}
+name:                {{name}}
+version:             0.1.0.0
+homepage:            https://github.com/hjkcai/PLP4e
+author:              Jingkun Hua
+maintainer:          huajingkun1214@gmail.com
+copyright:           2019 Jingkun Hua
+category:            Exercises
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable {{name}}
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+
+{-# START_FILE README.md #-}
+# {{name}}
+
+{-# START_FILE src/Main.hs #-}
+module Main where
+
+main :: IO ()
+main = do
+  putStrLn "hello world"
