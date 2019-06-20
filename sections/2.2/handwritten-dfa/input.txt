@@ -1,0 +1,5 @@
+read A
+read B
+sum := A + B - 1111 * 666.666
+write sum
+write sum / 2.1234
