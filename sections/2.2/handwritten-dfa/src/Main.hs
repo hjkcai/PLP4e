@@ -1,6 +1,6 @@
 module Main where
 
-import InitialState
+import BetterState
 
 main :: IO ()
 main = tokenize <$> readFile "input.txt" >>= mapM_ print
