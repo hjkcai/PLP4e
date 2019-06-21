@@ -38,17 +38,34 @@ newToken = Token { image = "", tag = "" }
 append :: Token -> Char -> Token
 append token char = token { image = image token ++ [char] }
 
+getTag :: State -> Token -> String
+getTag (Final 2) _  = "div"
+getTag (Final 6) _  = "lparen"
+getTag (Final 7) _  = "rparen"
+getTag (Final 8) _  = "plus"
+getTag (Final 9) _  = "minus"
+getTag (Final 10) _ = "times"
+getTag (Final 12) _ = "assign"
+getTag (Final 14) _ = "number"
+getTag (Final 15) _ = "number"
+getTag (Final 16) token
+  | image token == "read" || image token == "write" = "keyword"
+  | otherwise = "id"
+
+addTag :: Token -> State -> Token
+addTag token state = token { tag = getTag state token }
+
 dfa :: State -> DFAInput -> State
 dfa state c = case state of
   Start -> next c
     where next '/' = Final 2
-          next '('  = Final 6
-          next ')'  = Final 7
-          next '+'  = Final 8
-          next '-'  = Final 9
-          next '*'  = Final 10
-          next ':'  = Intermediate 11
-          next '.'  = Intermediate 13
+          next '(' = Final 6
+          next ')' = Final 7
+          next '+' = Final 8
+          next '-' = Final 9
+          next '*' = Final 10
+          next ':' = Intermediate 11
+          next '.' = Intermediate 13
           next c
             | isDigit c = Final 14
             | isAlpha c = Final 16
@@ -118,9 +135,10 @@ tokenizeInternal "" state token
 tokenizeInternal input@(char:nextInput) state token = finalize $ dfa state char
   where finalize nextState
           | isError nextState = error $ "Unexpected token " ++ show char ++ " at state " ++ show state ++ " near " ++ input
-          | isStart nextState = case state of
-              Final tag -> token { tag = show tag } : tokenizeInternal nextInput Start newToken
-              _         -> tokenizeInternal nextInput Start newToken
+          | isStart nextState = let trailingTokens = tokenizeInternal nextInput Start newToken in
+            case state of
+                Final tag -> addTag token state : trailingTokens
+                _         -> trailingTokens
 
           | isFinal nextState || isIntermediate nextState = tokenizeInternal nextInput nextState (append token char)
 

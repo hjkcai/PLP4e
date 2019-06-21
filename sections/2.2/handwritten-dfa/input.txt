@@ -1,5 +1,11 @@
 read A
-read B
+read B  // single line comment
+
+/***************************
+  Multi line comment
+***************************/
+
 sum := A + B - 1111 * 666.666
 write sum
 write sum / 2.1234
+a := b + 123
