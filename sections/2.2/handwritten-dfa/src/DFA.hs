@@ -1,20 +1,16 @@
-module BetterState where
+module DFA where
 
 import Data.Char (isSpace, isDigit, isAlpha)
+import Token
 
-type Input = String
-type DFAInput = Char
+type Input = Char
 type Prefix = String
-
-data Token = Token { image :: String
-                   , tag :: String
-                   } deriving Show
 
 data State = Start
            | Intermediate Integer
            | Final Integer
            | Error
-           deriving Show
+             deriving (Eq, Show)
 
 isStart :: State -> Bool
 isStart Start = True
@@ -31,12 +27,6 @@ isFinal _         = False
 isError :: State -> Bool
 isError Error = True
 isError _     = False
-
-newToken :: Token
-newToken = Token { image = "", tag = "" }
-
-append :: Token -> Char -> Token
-append token char = token { image = image token ++ [char] }
 
 getTag :: State -> Token -> String
 getTag (Final 2) _  = "div"
@@ -55,7 +45,7 @@ getTag (Final 16) token
 addTag :: Token -> State -> Token
 addTag token state = token { tag = getTag state token }
 
-dfa :: State -> DFAInput -> State
+dfa :: State -> Input -> State
 dfa state c = case state of
   Start -> next c
     where next '/' = Final 2
@@ -126,21 +116,3 @@ dfa state c = case state of
     where next c
             | isSpace c = Start
             | otherwise = Error
-
-tokenizeInternal :: Input -> State -> Token -> [Token]
-tokenizeInternal "" state token
-  | isStart state = []
-  | isFinal state = [token]
-  | otherwise = error $ "Unexpeted EOF at state " ++ show state
-tokenizeInternal input@(char:nextInput) state token = finalize $ dfa state char
-  where finalize nextState
-          | isError nextState = error $ "Unexpected token " ++ show char ++ " at state " ++ show state ++ " near " ++ input
-          | isStart nextState = let trailingTokens = tokenizeInternal nextInput Start newToken in
-            case state of
-                Final tag -> addTag token state : trailingTokens
-                _         -> trailingTokens
-
-          | isFinal nextState || isIntermediate nextState = tokenizeInternal nextInput nextState (append token char)
-
-tokenize :: Input -> [Token]
-tokenize input = tokenizeInternal input Start newToken
