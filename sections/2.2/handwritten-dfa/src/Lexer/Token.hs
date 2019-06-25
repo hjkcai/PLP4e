@@ -1,4 +1,4 @@
-module Token where
+module Lexer.Token where
 
 data Token = Token { image :: String
                    , tag :: String
